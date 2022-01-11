@@ -148,7 +148,8 @@ static int populateList(void * p, off_t size, struct HashListElement_S * hl, siz
 }
 
 
-/* hash entry needs to be zero-terminated */
+/* compare function for quicksort and bsearch
+ * hash entry needs to be zero-terminated (populateList does that) */
 static int hlCompare(const void *p1, const void *p2){
     struct HashListElement_S * e1;
     struct HashListElement_S * e2;
@@ -159,7 +160,9 @@ static int hlCompare(const void *p1, const void *p2){
 }
 
 
-
+/*
+ * iterate through compare file, trying to find matches in (sorted) reference file
+ */
 static void compareLines(
         int showMatch,
         struct HashListElement_S * pHlref,
@@ -253,21 +256,21 @@ int main(int argc, char **argv) {
         perror("stat for reference file failed");
         return EXIT_FAILURE;
     }
-
+    /* get file size for reference file */
     filesize_ref = statBuf.st_size;
 
     if(fstat(fd_comp, &statBuf) < 0){
         perror("stat for compare file failed");
         return EXIT_FAILURE;
     }
-
+    /* get file size for compare file */
     filesize_comp = statBuf.st_size;
 
+    /* add 1 byte for additional termination character */
     sizeRef  = filesize_ref + 1;
     sizeComp = filesize_comp+ 1;
 
-
-    /* make mapping 1 byte larger to allow for terminating zero */
+    /* create private memory mappings from both files */
     mmfComp = mmap( 0, sizeComp, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd_comp, 0);
     mmfRef  = mmap( 0, sizeRef,  PROT_READ | PROT_WRITE, MAP_PRIVATE, fd_ref, 0);
 
@@ -303,15 +306,19 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    refElements = (size_t) lines_ref;
+    /* the number of data points / elements equals the number of lines (or is less if there are comments/empty lines/etc.) */
+    refElements       = (size_t) lines_ref;
     elementsToCompare = (size_t) lines_comp;
+    /* populate reference list */
     populateList(mmfRef, sizeRef, hl_ref, &refElements);
+    /* populate compare list */
     populateList(mmfComp, sizeComp, hl_comp, &elementsToCompare);
 
-    // sort hash line list
+    /* sort reference list by 'hash' to allow for efficient binary search */
     qsort(hl_ref, refElements, sizeof(struct HashListElement_S), hlCompare);
 
-    // default to "show match"
+    /* search reference for matches
+     * default to "show match" */
     compareLines(1, hl_ref, refElements, hl_comp, elementsToCompare);
 
 	return EXIT_SUCCESS;
