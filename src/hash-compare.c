@@ -2,7 +2,7 @@
  ============================================================================
  Name        : hash-compare.c
  Author      : Felix Erckenbrecht
- Version     :
+ Version     : 1.0
  Copyright   : BSD 3-clause
  Description : Compare hashdeep hash-files for matches
  ============================================================================
@@ -16,18 +16,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <string.h>
-#ifdef __linux__
-// for strlcpy
-#include <bsd/string.h>
-#endif
 
-/*
- * Memmove
- * Wenn Zeile nicht zur Syntax passt / Kommentar ist:
- * Rest an Anfang von Zeile verschieben
- *
- *
- */
 
 struct HashListElement_S{
     off_t  filesize;
@@ -42,8 +31,8 @@ struct HashListElement_S{
 
 
 static void printUsage(){
-    printf( "hash-compare ("__DATE__" "__TIME__")\n"
-            "Compare hashdeep files.\n"
+    printf( "hash-compare v1.0 ("__DATE__" "__TIME__")\n"
+            "Compare hashdeep files, find matches.\n"
             "\n"
             "Usage: hash-compare <reference-file> <compare-file>\n"
             "\n"
