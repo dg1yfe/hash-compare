@@ -42,9 +42,10 @@ struct HashListElement_S{
 
 
 static void printUsage(){
-    printf( "Hash-Compare for hashdeep files\n"
+    printf( "hash-compare ("__DATE__" "__TIME__")\n"
+            "Compare hashdeep files.\n"
             "\n"
-            "Usage: hash-compare file1 file2\n"
+            "Usage: hash-compare <reference-file> <compare-file>\n"
             "\n"
             );
 }
