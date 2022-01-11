@@ -222,7 +222,7 @@ int main(int argc, char **argv) {
     size_t maxLineLenSort;
     size_t maxLineLenComp;
 
-    off_t size_ref,size_comp;
+    off_t filesize_ref,filesize_comp;
     off_t sizeRef,sizeComp;
 
     int lines_ref, lines_comp;
@@ -260,20 +260,20 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    size_ref = statBuf.st_size;
+    filesize_ref = statBuf.st_size;
 
     if(fstat(fd_comp, &statBuf) < 0){
         perror("stat for compare file failed");
         return EXIT_FAILURE;
     }
 
-    size_comp = statBuf.st_size;
+    filesize_comp = statBuf.st_size;
 
-    sizeComp = size_comp+ 1;
-    sizeRef  = size_ref + 1;
+    sizeRef  = filesize_ref + 1;
+    sizeComp = filesize_comp+ 1;
 
 
-    /* make Mapping 1 byte larger to allow for terminating zero */
+    /* make mapping 1 byte larger to allow for terminating zero */
     mmfComp = mmap( 0, sizeComp, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd_comp, 0);
     mmfRef  = mmap( 0, sizeRef,  PROT_READ | PROT_WRITE, MAP_PRIVATE, fd_ref, 0);
 
