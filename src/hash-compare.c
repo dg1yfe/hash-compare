@@ -43,33 +43,29 @@ static void printUsage(){
 /*
  * count lines in hash files
  */
-static int countLines(void * p, off_t size, size_t * maxLineSize){
+static int countLines(void * p, off_t size){
     int lines;
     char * cp;
-    size_t lineSize;
 
     lines = 0;
-    lineSize = 0;
     do{
         /* find next NL / end-of-line */
         cp = memchr(p,'\n', size);
         if(cp != NULL){
             size_t len;
             len = (uintptr_t)cp - (uintptr_t) p;
-            // keep track of maximum line size
-            lineSize = len > lineSize ? len : lineSize;
             // skip past NL
             len+=1;
-            p += len;
+            // move pointer to next line
+            p  += len;
+            // decrease size to stay within valid range
             size -= len;
             // one more line found
             lines++;
         }
+        /* iterate while something remaining AND a line had been found */
     }while( (size > 0) && (cp != NULL) );
 
-    if(maxLineSize != NULL){
-        *maxLineSize = lineSize;
-    }
     return lines;
 }
 
@@ -219,8 +215,6 @@ int main(int argc, char **argv) {
     int fd_ref, fd_comp;
     char * mmfRef;
     char * mmfComp;
-    size_t maxLineLenSort;
-    size_t maxLineLenComp;
 
     off_t filesize_ref,filesize_comp;
     off_t sizeRef,sizeComp;
@@ -289,8 +283,9 @@ int main(int argc, char **argv) {
     close(fd_ref);
     close(fd_comp);
 
-    lines_ref  = countLines(mmfRef,  sizeRef,  &maxLineLenSort);
-    lines_comp = countLines(mmfComp, sizeComp, &maxLineLenComp);
+    /* get number of lines for each file */
+    lines_ref  = countLines(mmfRef,  sizeRef);
+    lines_comp = countLines(mmfComp, sizeComp);
 
     if(lines_ref < 0 || (lines_comp < 0)){
         perror("Error while counting lines.\n");
